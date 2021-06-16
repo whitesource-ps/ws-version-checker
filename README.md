@@ -2,25 +2,57 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub release](https://img.shields.io/github/release/whitesource-ps/wss-template.svg)](https://github.com/whitesource-ps/wss-template/releases/latest)  
-# WhiteSource Tool Name
-Tool description
+[![WS Version Checker Build and Publish](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml)
+[![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
-## Supported Operating Systems
+# WhiteSource version-checker tool
+The script allows checking the WhiteSource artifacts , validate whether there is a newer version and update it accordingly.
+###Supported artifacts :
+- WhiteSource Unified Agent.
+
+### How to use the script
+- Run on you local machine where the artifact stored.
+- Run as part of your CI process , prior of using once of the supported artifacts.
+
+### What does the script do?
+The script checks the artifact version by one of the following :
+1. compare of the local version file hash value with the latest version from WhiteSource site.
+2. compare of the local version file semantic versioning with the WhiteSource GitHub latest release link.
+
+### Supported Operating Systems
 - **Linux (Bash):**	CentOS, Debian, Ubuntu, RedHat
 - **Windows (PowerShell):**	10, 2012, 2016
 
-## Prerequisites
-Prerequisite list
+### Prerequisites
+- Python 3.5 or above
 
-## Installation
-1. Download **wss-tool-name** to your computer
-2. Edit the file **filename** and add:  
-    `this text`  
-
-## Execution
-Execution instructions:  
-  - **Bash:**  
-  `:~/dirname$ [sudo] ./wss-tool-name.sh` (requires setting the file as executable using `chmod +x filename`)  
-  - **PowerShell:**  
-  `PS C:\dirname> wss-tool-name.ps1`  
-  
+### Installation
+1. Download and unzip **ws-version-checker.zip**.
+2. From the command line, navigate to the ws-version-checker directory and install the package:  
+   `pip install -r requirements.txt`. 
+3. Edit the **params.config** file and update the relevant parameters (see the configuration parameters below) or
+   use a cmd line for running.
+    
+### Configuration Parameters
+```
+==============================================================================================================================
+| config file                   | cli                 | Description                                                          |
+==============================================================================================================================
+| fileDir                       | -fd                 | The file directory path.                                             |
+------------------------------------------------------------------------------------------------------------------------------
+| fileName                      | -fn                 | The name of the file to be checked by the tool.                      |
+------------------------------------------------------------------------------------------------------------------------------
+| compareWithHashMethod         | -hm                 | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+------------------------------------------------------------------------------------------------------------------------------
+| compareWithWsGit              | -cg                 | If True -compared with git version ,if false compareWithHashMethod.  |
+==============================================================================================================================
+```
+ ### Execution
+ From the command line:
+ - `python wsversion-checker.py -fd $filerDir -fn $fileName -hm $ -cg $compareWithWsGit`
+ 
+ Using a config file:
+ - `python ws-copy-policy.py <CONFIG_FILE>`
+ 
+### Author
+WhiteSource Software ©
