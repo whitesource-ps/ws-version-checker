@@ -42,14 +42,14 @@ The script checks the artifact version by one of the following :
 ------------------------------------------------------------------------------------------------------------------------------
 | fileName                      | -fn                 | The name of the file to be checked by the tool.                      |
 ------------------------------------------------------------------------------------------------------------------------------
-| compareWithHashMethod         | -hm                 | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+| comparedHashMethod            | -hm                 | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
 ------------------------------------------------------------------------------------------------------------------------------
-| compareWithWsGit              | -cg                 | If True -compared with git version ,if false compareWithHashMethod.  |
+| compareWithWsGit              | -cg                 | If True -compared with git version ,if false use comparedHashMethod. |
 ==============================================================================================================================
 ```
  ### Execution
  From the command line:
- - `python wsversion-checker.py -fd $filerDir -fn $fileName -hm $ -cg $compareWithWsGit`
+ - `python ws-version-checker.py -fd $filerDir -fn $fileName -hm $ -cg $compareWithWsGit`
  
  Using a config file:
  - `python ws-copy-policy.py <CONFIG_FILE>`

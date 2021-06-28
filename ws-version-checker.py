@@ -12,19 +12,14 @@ from packaging import version
 
 # file_handler = logging.FileHandler(filename='version-check.log')
 stdout_handler = logging.StreamHandler(sys.stdout)
-handlers = [stdout_handler]  # file_handler
+handlers = [stdout_handler]
 logging.basicConfig(level=logging.INFO,
                     format='%(levelname)s %(asctime)s %(thread)d: %(message)s',
                     handlers=handlers
                     )
 logger = logging.getLogger()
 
-file_name = ''
-file_dir = ''
 file_path = ''
-url = ''
-hash_method = ''
-compare_ws_git = ''
 config = None
 HASH_TYPE = hashlib.algorithms_guaranteed
 GITHUB_URL_UA_JAR = 'https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar'
@@ -40,11 +35,9 @@ class Configuration:
         config.optionxform = str
         config.read(CONFIG_FILE)
 
-        # WS Settings
         self.file_dir = config['DEFAULT'].get('fileDir')
         self.file_name = config['DEFAULT'].get('fileName')
-        # self.url = config['DEFAULT'].get('url')
-        self.hash_method = config['DEFAULT'].get('compareWithHashMethod')
+        self.hash_method = config['DEFAULT'].get('comparedHashMethod')
         self.compare_ws_git = config['DEFAULT'].getboolean('compareWithWsGit')
 
 
@@ -53,13 +46,14 @@ class ArgumentsParser:
         """
         :return:
         """
-        parser = argparse.ArgumentParser(description="Description for my parser")
+        parser = argparse.ArgumentParser(description="version-checker parser")
         parser.add_argument("-fd", required=False)
         parser.add_argument("-fn", required=False)
         parser.add_argument("-hm", required=False)
         parser.add_argument("-cg", required=False, type=str2bool)
 
         argument = parser.parse_args()
+
         if argument.fd:
             self.file_dir = argument.fd
         if argument.fn:
@@ -102,9 +96,12 @@ def download_new_version_hash_diff():
     logger.info(f"{config.hash_method} checksum_remote :  {url_hash}")
 
     if file_hash != url_hash:
+        logging.info('Start downloading the WhiteSource Unified Agent latest version')
         r = requests.get(MAIN_URL_UA_JAR, allow_redirects=True, headers={'Cache-Control': 'no-cache'})
         open(file_path, 'wb').write(r.content)
-        logging.info('WhiteSource new version download is completed')
+        logging.info('WhiteSource Unified Agent latest version version download is completed')
+    else:
+        logger.info(f"You have the latest version ({file_hash})")
 
 
 def download_new_version_git_diff():
@@ -123,12 +120,13 @@ def download_new_version_git_diff():
 
     # compare between user plugin version and current git version and download
     if version.parse(current_ua_user_version) < version.parse(git_ua_version_final):
-        logging.debug("A new unified agent version has been found ")
+        logger.info(f"A new unified agent version ({git_ua_version_final}) has been found ")
+        logging.info('Start downloading the WhiteSource Unified Agent latest version')
         r = requests.get(GITHUB_URL_UA_JAR, allow_redirects=True, headers={'Cache-Control': 'no-cache'})
         open(file_path, 'wb').write(r.content)
-        logger.info('WhiteSource new version download is completed')
+        logging.info('WhiteSource Unified Agent latest version download is completed')
     else:
-        logger.info("You have the latest version")
+        logger.info(f"You have the latest version ({git_ua_version_final})")
 
 
 def str2bool(v):
@@ -146,14 +144,15 @@ def main():
     global config
     global file_path
 
-    logging.info("Starting version check")
     args = sys.argv[1:]
-    if len(args) >= 4:
+    if len(args) >= 8:
         config = ArgumentsParser()
     else:
         config = Configuration()
+
     file_path = os.path.join(config.file_dir, config.file_name)
 
+    logger.info("Starting version check")
     if config.compare_ws_git:
         download_new_version_git_diff()
     else:
