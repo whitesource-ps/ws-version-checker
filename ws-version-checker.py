@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import zipfile
-from configparser import ConfigParser
+from configparser import ConfigParser, MissingSectionHeaderError
 
 import requests
 from packaging import version
@@ -47,10 +47,10 @@ class ArgumentsParser:
         :return:
         """
         parser = argparse.ArgumentParser(description="version-checker parser")
-        parser.add_argument("-fd", required=False)
-        parser.add_argument("-fn", required=False)
-        parser.add_argument("-hm", required=False)
-        parser.add_argument("-cg", required=False, type=str2bool)
+        parser.add_argument("-fd", required=True)
+        parser.add_argument("-fn", required=True)
+        parser.add_argument("-hm", required=True)
+        parser.add_argument("-cg", required=True, type=str2bool)
 
         argument = parser.parse_args()
 
@@ -144,19 +144,37 @@ def main():
     global config
     global file_path
 
-    args = sys.argv[1:]
-    if len(args) >= 8:
-        config = ArgumentsParser()
-    else:
-        config = Configuration()
+    try:
+        args = sys.argv[1:]
+        if len(args) >= 8:
+            config = ArgumentsParser()
+        else:
+            config = Configuration()
 
-    file_path = os.path.join(config.file_dir, config.file_name)
+        # Check if config parameter exists
+        test = {config.file_name, config.file_dir, config.compare_ws_git, config.hash_method}
+        for param in test:
+            if param is None:
+                raise TypeError
 
-    logger.info("Starting version check")
-    if config.compare_ws_git:
-        download_new_version_git_diff()
-    else:
-        download_new_version_hash_diff()
+        file_path = os.path.join(config.file_dir, config.file_name)
+
+        logger.info("Starting version check")
+        if config.compare_ws_git:
+            download_new_version_git_diff()
+        else:
+            download_new_version_hash_diff()
+
+    except MissingSectionHeaderError:
+        logger.warning("1-The Version-Checker didn't run -The config file header is missing.")
+    except TypeError:
+        logger.warning("2-The Version-Checker didn't run - Please check you are using the expected variables.")
+    except FileNotFoundError:
+        logger.warning("3-The Version-Checker didn't run - Please check your fileName / fileDir variables.")
+    except ValueError:
+        logger.warning("4-compareWithWsGit value is not boolean.")
+    except Exception:
+        logger.warning("The Version-Checker didn't run - Please check your setup ")
 
 
 if __name__ == '__main__':

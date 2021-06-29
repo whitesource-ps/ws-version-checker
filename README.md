@@ -5,9 +5,9 @@
 [![WS Version Checker Build and Publish](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml)
 [![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
-# WhiteSource version-checker tool
+# WhiteSource Version-Checker tool
 The script allows checking the WhiteSource artifacts , validate whether there is a newer version and update it accordingly.
-###Supported artifacts :
+### Supported artifacts :
 - WhiteSource Unified Agent.
 
 ### How to use the script
