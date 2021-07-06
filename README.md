@@ -36,20 +36,20 @@ The script checks the artifact version by one of the following :
 ### Configuration Parameters
 ```
 ==============================================================================================================================
-| config file                   | cli                 | Description                                                          |
+| config file            | cli                       | Description                                                           |
 ==============================================================================================================================
-| fileDir                       | -fd                 | The file directory path.                                             |
+| fileDir                | -f  --fileDir             | The file directory path.                                              |
 ------------------------------------------------------------------------------------------------------------------------------
-| fileName                      | -fn                 | The name of the file to be checked by the tool.                      |
+| fileName               | -n  --fileName            | The name of the file to be checked by the tool.                       |
 ------------------------------------------------------------------------------------------------------------------------------
-| comparedHashMethod            | -hm                 | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+| comparedHashMethod     | -m  --comparedHashMethod  | One of hashlib.algorithms_guaranteed to perform the hash compare.     |
 ------------------------------------------------------------------------------------------------------------------------------
-| compareWithWsGit              | -cg                 | If True -compared with git version ,if false use comparedHashMethod. |
+| compareWithWsGit       | -g  --compareWithWsGit    | If True -compared with git version ,if false use comparedHashMethod.  |
 ==============================================================================================================================
 ```
  ### Execution
  From the command line:
- - `python ws-version-checker.py -fd $filerDir -fn $fileName -hm $ -cg $compareWithWsGit`
+ - `python ws-version-checker.py -f $filerDir -n $fileName -m $ -g $compareWithWsGit`
  
  Using a config file:
  - `python ws-copy-policy.py <CONFIG_FILE>`
