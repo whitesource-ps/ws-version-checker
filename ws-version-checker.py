@@ -33,19 +33,19 @@ def get_config_file():
         conf_file.hash_method = conf_file['DEFAULT'].get('comparedHashMethod')
         conf_file.compare_ws_git = conf_file['DEFAULT'].getboolean('compareWithWsGit')
 
-        check = [conf_file.file_name, conf_file.file_dir, conf_file.compare_ws_git, conf_file.hash_method]
+        check = [conf_file.file_name, conf_file.file_dir, conf_file.compare_ws_git, conf_file.hash_method]  # validation for missing parameters [DEFAULT]
         for param in check:
             if param is None:
                 raise TypeError
 
     except TypeError:
         logging.warning("The Version-Checker didn't run - Please check you are not missing the expected variables.")  # handle missing / commented variables
-        exit(-1)
+        sys.exit(1)
     except ValueError:
         logging.warning("compareWithWsGit value is not boolean.")
-        exit(-1)
-    logging.info(conf_file.defaults())
-    logging.info("finished analyzing config file")
+        sys.exit(1)
+    logging.info(f"The config file setup is : {conf_file.defaults()}")
+    logging.info("Finished analyzing config file")
 
     return conf_file
 
@@ -62,7 +62,7 @@ def get_args():
     args = parser.parse_args()
 
     logging.info(f"Arguments received :{args}")
-    logging.info("finished analyzing arguments")
+    logging.info("Finished analyzing arguments")
 
     return args
 
@@ -81,8 +81,8 @@ def str2bool(v):
 
 
 #######################################################################################################################
-def local_git_version():
-    # fetch the local git version
+def local_sem_version():
+    # fetch the local file semantic version
     archive = zipfile.ZipFile(config.file_path, 'r')
     file_prop_path = archive.read('META-INF/maven/org.whitesource/wss-unified-agent-main/pom.properties')
     file_prop_path = str(file_prop_path, 'UTF-8')
@@ -104,7 +104,7 @@ def remote_git_version():
 
 
 def version_git_diff():
-    current_ua_user_version = local_git_version()
+    current_ua_user_version = local_sem_version()
     git_ua_version_final = remote_git_version()
 
     # compare between user plugin version and current git version and download
@@ -170,27 +170,6 @@ def version_hash_diff():
 
 #######################################################################################################################
 
-def compare_versions(compare_ws_git):
-    if compare_ws_git:
-        result = version_git_diff()
-    else:
-        result = version_hash_diff()
-
-    return result
-
-
-def validate_dir_and_file():
-    try:
-        config.file_path = os.path.join(config.file_dir, config.file_name)
-        if not os.path.exists(config.file_path):
-            raise FileNotFoundError
-    except FileNotFoundError:
-        logging.warning("The Unified Agent file doesn't exist - please check your fileName and fileDir parameters")
-        exit(-1)
-
-    return config.file_path
-
-
 def download_new_version(compare, compare_ws_git):
     if compare is True:
         if compare_ws_git is True:
@@ -205,7 +184,27 @@ def download_new_version(compare, compare_ws_git):
             logging.info('WhiteSource Unified Agent latest version version download is completed')
 
 
-def main():
+def compare_versions(compare_ws_git):
+    if compare_ws_git:
+        result = version_git_diff()
+    else:
+        result = version_hash_diff()
+
+    return result
+
+
+def validate_dir_and_file():
+    logging.info("Checking if compared file exists")
+    try:
+        config.file_path = os.path.join(config.file_dir, config.file_name)
+        if not os.path.exists(config.file_path):
+            raise FileNotFoundError
+    except FileNotFoundError:
+        logging.warning("The Unified Agent file doesn't exist - please check your fileName and fileDir parameters")
+        sys.exit(1)
+
+
+def get_setup():
     global config
     global CONFIG_FILE
 
@@ -218,30 +217,37 @@ def main():
                     raise FileNotFoundError
             except FileNotFoundError:
                 logging.info("The config file doesn't exist locally- please check your command")
-                exit(-1)
+                sys.exit(1)
 
         if len(args) > 1:
             config = get_args()
         else:
             config = get_config_file()
 
-        validate_dir_and_file()
+        return config
+    except MissingSectionHeaderError:
+        logging.warning("The Version-Checker didn't run -The config file header is missing.")
+        sys.exit(1)
+
+
+def main():
+    try:
+        get_setup()  # get configuration from cli / config file
+
+        validate_dir_and_file()  # validation of the file path
 
         logging.info("Starting WhiteSource version check")
 
-        compare = compare_versions(config.compare_ws_git)
+        compare = compare_versions(config.compare_ws_git)  # compare between versions
 
-        download_new_version(compare, config.compare_ws_git)
+        download_new_version(compare, config.compare_ws_git)  # download new version
 
         logging.info("Completed WhiteSource version check")
-        exit(0)
+        sys.exit(0)
 
-    except MissingSectionHeaderError:
-        logging.warning("The Version-Checker didn't run -The config file header is missing.")
-        exit(-1)
     except Exception:
         logging.warning("The Version-Checker didn't run - Please check your setup or address WhiteSource Support team ")
-        exit(-1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
