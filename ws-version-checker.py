@@ -12,13 +12,13 @@ from packaging import version
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(asctime)s %(thread)d: %(message)s', stream=sys.stdout)
 
-# Update this section for the supported artifacts
-# ==========================================================
+# Section for the supported artifacts
+# =====================================
+properties_file = {'META-INF/maven/org.whitesource/wss-unified-agent-main/pom.properties': 'ws_unified_agent'}
 supported_artifacts = {'ws_unified_agent': 'Unified Agent'}
 github_url = {'ws_unified_agent': 'https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar'}
 main_url = {'ws_unified_agent': 'https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar'}
-properties_file = {'ws_unified_agent': 'META-INF/maven/org.whitesource/wss-unified-agent-main/pom.properties'}
-# ==========================================================
+# ====================================
 
 get_new_version = None
 config = {}
@@ -39,9 +39,9 @@ def get_config_file(config_file):
     conf_file = ConfigParser()
     conf_file.read(config_file)
 
-    logging.info("Start analyzing config file")
+    logging.info("Start analyzing config file.")
     conf_file_dict = {
-        'ws_file_type': conf_file[CONFIG_FILE_HEADER_NAME].get('wsFileType'),
+        # 'ws_file_type': conf_file[CONFIG_FILE_HEADER_NAME].get('wsFileType'),
         'file_dir': conf_file[CONFIG_FILE_HEADER_NAME].get('fileDir'),
         'file_name': conf_file[CONFIG_FILE_HEADER_NAME].get('fileName'),
         'hash_method': conf_file[CONFIG_FILE_HEADER_NAME].get('comparedHashMethod', fallback=DEFAULT_HASH_METHOD),
@@ -57,43 +57,41 @@ def get_config_file(config_file):
             logging.error(f"Please check your {key} parameter-it is missing from the config file")
             sys.exit(1)
 
-    logging.info(f"Arguments received :{conf_file_dict}")
-    logging.info("Finished analyzing config file")
+    logging.info(f"Config file parameters :{conf_file_dict}")
+    logging.info("Finished analyzing the config file.")
 
     return conf_file_dict
 
 
 def get_args(arguments):
-    logging.info("Start analyzing arguments")
+    logging.info("Start analyzing arguments.")
     parser = argparse.ArgumentParser(description="version-checker parser")
 
-    parser.add_argument('-c', "--configFile", help="The config file", required=False, dest='con_f')
+    parser.add_argument('-c', "--configFile", help="The config file", required=False, dest='conf_f')
     is_config_file = bool(arguments[0] in ['-c', '--configFile'])
 
-    parser.add_argument('-t', "--wsFileType", help="The file type to be checked", required=not is_config_file, dest='ws_file_type')
     parser.add_argument('-f', "--fileDir", help="The file directory path", required=not is_config_file, dest='file_dir')
     parser.add_argument('-n', "--fileName", help="The name of the file to be checked by the tool", required=not is_config_file, dest='file_name')
     parser.add_argument('-m', "--comparedHashMethod", help="One of hashlib.algorithms_guaranteed", dest='hash_method', default=DEFAULT_HASH_METHOD, choices=HASH_TYPE)
     parser.add_argument('-g', "--compareWithWsGit", help="True-compared with git version ,false-comparedHashMethod", dest='compare_ws_git', default=COMPARE_WITH_WS_GIT, type=str2bool)
 
     args = parser.parse_args()
-    logging.debug(f"Arguments received :{args}")
+    logging.info(f"Arguments received :{args}")
 
-    if args.con_f is None:
+    if args.conf_f is None:
         args_dict = vars(args)
 
-    elif os.path.exists(args.con_f):
-        args_dict = get_config_file(args.con_f)
+    elif os.path.exists(args.conf_f):
+        args_dict = get_config_file(args.conf_f)
     else:
         logging.error("Config file doesn't exists")
         sys.exit(1)
 
-    logging.info("Finished analyzing arguments")
+    logging.info("Finished analyzing arguments.")
     return args_dict
 
 
 ################################################################################
-
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -105,7 +103,19 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-#######################################################################################################################
+################################################################################
+def fetch_prop_file():
+    archive = zipfile.ZipFile(config['file_path'], 'r')
+    archive_file_list = archive.filelist
+    properties_file_keys = properties_file.keys()
+
+    for key in properties_file_keys:
+        for item in archive_file_list:
+            if key == item.filename:
+                ws_file_type = key
+                return ws_file_type
+
+
 def fetch_local_sem_version(file_prop):
     # fetch the local file semantic version
     archive = zipfile.ZipFile(config['file_path'], 'r')
@@ -182,7 +192,7 @@ def check_version_hash_diff(remote_file):
         logging.info(f"You have the latest {supported_artifacts[config['ws_file_type']]} version ({local_file_hash})")
     else:
         is_download = True
-        logging.info(f"A new {supported_artifacts[config['ws_file_type']]} version has been found ")
+        logging.info(f"A new {supported_artifacts[config['ws_file_type']]} version has been found. ")
 
     return is_download
 
@@ -191,31 +201,35 @@ def check_version_hash_diff(remote_file):
 
 def download_new_version(compare_with_ws_git):
     if compare_with_ws_git:
-        logging.info(f"Start downloading the WhiteSource {supported_artifacts[config['ws_file_type']]} latest version")
+        logging.info(f"Start downloading the WhiteSource {supported_artifacts[config['ws_file_type']]} latest version.")
         r = requests.get(github_url[config['ws_file_type']], allow_redirects=True, headers={'Cache-Control': 'no-cache'})
         open(config['file_path'], 'wb').write(r.content)
-        logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} latest version download is completed")
+        logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} latest version download is completed.")
     else:
         open(config['file_path'], 'wb').write(get_new_version.content)
-        logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} latest version was updated")
+        logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} latest version was updated.")
 
 
 def versions_compared_have_diff(compare_with_ws_git):
     if compare_with_ws_git:
-        is_version_diff = check_version_git_diff(properties_file[config['ws_file_type']], github_url[config['ws_file_type']])
+        for key, value in properties_file.items():
+            if value == config['ws_file_type']:
+                prop_fil = key
+                is_version_diff = check_version_git_diff(prop_fil, github_url[config['ws_file_type']])
+                return is_version_diff
     else:
         is_version_diff = check_version_hash_diff(main_url[config['ws_file_type']])
-
-    return is_version_diff
+        return is_version_diff
 
 
 def validate_local_file_exist():
-    logging.info(f"Checking if the {supported_artifacts[config['ws_file_type']]} file exists in your environment")
+    logging.info(f"Checking if the file exists in your environment.")
     config['file_path'] = os.path.join(config['file_dir'], config['file_name'])
     if os.path.exists(config['file_path']):
-        logging.info(f"The {supported_artifacts[config['ws_file_type']]} : {config['file_path']} exists")
+        config['ws_file_type'] = properties_file[fetch_prop_file()]
+        logging.info(f"The {supported_artifacts[config['ws_file_type']]} exists at: {config['file_path']} .")
     else:
-        logging.error(f"The {supported_artifacts[config['ws_file_type']]} to be checked doesn't exist - please check your fileName and fileDir parameters")
+        logging.error(f"The file to be checked doesn't exist - please check your fileName and fileDir parameters.")
         sys.exit(1)
 
 
@@ -232,12 +246,12 @@ def main():
     read_setup()  # read the configuration from cli / config file
     validate_local_file_exist()  # validation of the file path
 
-    logging.info("Starting WhiteSource version check")
+    logging.info("Starting WhiteSource version check.")
 
     if versions_compared_have_diff(config['compare_ws_git']):  # compare between versions
         download_new_version(config['compare_ws_git'])  # download new version
 
-    logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} version check completed")
+    logging.info(f"WhiteSource {supported_artifacts[config['ws_file_type']]} version check completed.")
 
 
 if __name__ == '__main__':

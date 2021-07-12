@@ -1,14 +1,14 @@
 ![Logo](https://whitesource-resources.s3.amazonaws.com/ws-sig-images/Whitesource_Logo_178x44.png)  
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
-[![GitHub release](https://img.shields.io/github/release/whitesource-ps/wss-template.svg)](https://github.com/whitesource-ps/wss-template/releases/latest)  
+[![GitHub release](https://img.shields.io/github/release/whitesource-ps/ws-version-checker)](https://github.com/whitesource-ps/ws-version-checker/releases/latest)   
 [![WS Version Checker Build and Publish](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml)
 [![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
-# WhiteSource Version-Checker tool
-The script allows checking the WhiteSource artifacts , validate whether there is a newer version and update it accordingly.
+# WhiteSource Version-Checker
+The script enables checking the WhiteSource artifacts , validate whether there is a new version and update it accordingly.
 ### Supported artifacts 
-- WhiteSource [Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/804814917/Unified+Agent+Overview).
+- [WhiteSource Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/804814917/Unified+Agent+Overview).
 
 ### How to use the script
 - Run on your local machine where the artifact is stored.
@@ -38,8 +38,6 @@ The script checks the artifact version by one of the following :
 ============================================================================================================================================================================
 | config file            | cli                        | Default  | Optional values                  | Description                                                           |
 ============================================================================================================================================================================
-| wsFileType             | -t,  --wsFileType          |          | ws_unified_agent                  | The type of file ( supported artifact ) to be checked.               |
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | fileDir                | -f,  --fileDir             |          |                                   | The file directory path.                                             |
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | fileName               | -n,  --fileName            |          |                                   | The name of the file to be checked by the tool.                      |
@@ -51,7 +49,7 @@ The script checks the artifact version by one of the following :
 ```
  ### Execution
  From the command line:
- - `python ws-version-checker.py -t ws_unified_agent -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
+ - `python ws-version-checker.py -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
  
  Using a config file:
  - `python ws-copy-policy.py -c / --configFile <CONFIG_FILE>`
