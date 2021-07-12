@@ -7,24 +7,24 @@
 
 # WhiteSource Version-Checker tool
 The script allows checking the WhiteSource artifacts , validate whether there is a newer version and update it accordingly.
-### Supported artifacts :
-- WhiteSource Unified Agent.
+### Supported artifacts 
+- WhiteSource [Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/804814917/Unified+Agent+Overview).
 
 ### How to use the script
-- Run on you local machine where the artifact stored.
-- Run as part of your CI process , prior of using once of the supported artifacts.
+- Run on your local machine where the artifact is stored.
+- Run as part of your CI process , prior of using one of the supported artifacts.
 
 ### What does the script do?
 The script checks the artifact version by one of the following :
-1. compare of the local version file hash value with the latest version from WhiteSource site.
-2. compare of the local version file semantic versioning with the WhiteSource GitHub latest release link.
+1. Compare of the local version file hash value (based on [hashlib.algorithms_guaranteed](https://github.com/python/cpython/blob/main/Lib/hashlib.py)) with the latest version from WhiteSource.
+2. Compare of the local version file semantic versioning with the WhiteSource artifact GitHub repo latest release link - [for example - Unified Agent](https://github.com/whitesource/unified-agent-distribution/releases) .
 
 ### Supported Operating Systems
 - **Linux (Bash):**	CentOS, Debian, Ubuntu, RedHat
 - **Windows (PowerShell):**	10, 2012, 2016
 
 ### Prerequisites
-- Python 3.5 or above
+- Python 3.6 or above
 
 ### Installation
 1. Download and unzip **ws-version-checker.zip**.
@@ -35,24 +35,26 @@ The script checks the artifact version by one of the following :
     
 ### Configuration Parameters
 ```
-========================================================================================================================================
-| config file            | cli                       | Default  | Description                                                          |
-========================================================================================================================================
-| fileDir                | -f  --fileDir             |          | The file directory path.                                             |
-----------------------------------------------------------------------------------------------------------------------------------------
-| fileName               | -n  --fileName            |          | The name of the file to be checked by the tool.                      |
-----------------------------------------------------------------------------------------------------------------------------------------
-| comparedHashMethod     | -m  --comparedHashMethod  | md5      | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
-----------------------------------------------------------------------------------------------------------------------------------------
-| compareWithWsGit       | -g  --compareWithWsGit    | False    | If True -compared with git version ,if false use comparedHashMethod. |
-========================================================================================================================================
+============================================================================================================================================================================
+| config file            | cli                        | Default  | Optional values                  | Description                                                           |
+============================================================================================================================================================================
+| wsFileType             | -t,  --wsFileType          |          | ws_unified_agent                  | The type of file ( supported artifact ) to be checked.               |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| fileDir                | -f,  --fileDir             |          |                                   | The file directory path.                                             |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| fileName               | -n,  --fileName            |          |                                   | The name of the file to be checked by the tool.                      |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| comparedHashMethod     | -m,  --comparedHashMethod  | md5      | See hashlib.algorithms_guaranteed | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| compareWithWsGit       | -g,  --compareWithWsGit    | False    | True / False                      | If True -compared with git version ,if false use comparedHashMethod. |
+============================================================================================================================================================================
 ```
  ### Execution
  From the command line:
- - `python ws-version-checker.py -f $filerDir -n $fileName -m $ -g $compareWithWsGit`
+ - `python ws-version-checker.py -t ws_unified_agent -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
  
  Using a config file:
- - `python ws-copy-policy.py <CONFIG_FILE>`
+ - `python ws-copy-policy.py -c / --configFile <CONFIG_FILE>`
  
 ### Author
 WhiteSource Software ©
