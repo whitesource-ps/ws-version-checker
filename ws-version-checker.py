@@ -108,12 +108,18 @@ def fetch_prop_file():
     archive = zipfile.ZipFile(config['file_path'], 'r')
     archive_file_list = archive.filelist
     properties_file_keys = properties_file.keys()
+    ws_file_type = None
 
     for key in properties_file_keys:
         for item in archive_file_list:
             if key == item.filename:
                 ws_file_type = key
-                return ws_file_type
+
+    if ws_file_type is None:
+        logging.error("The file is not supported by WhiteSource Version-Checker - please check")
+        sys.exit(1)
+    else:
+        return ws_file_type
 
 
 def fetch_local_sem_version(file_prop):
