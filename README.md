@@ -25,6 +25,7 @@ The script checks the artifact version by one of the following :
 
 ### Prerequisites
 - Python 3.6 or above
+- One of the followings ( in favor of jarsigner ) : Java JDK 8 ,Java JDK 11
 
 ### Installation
 1. Download and unzip **ws-version-checker.zip**.
@@ -35,24 +36,30 @@ The script checks the artifact version by one of the following :
     
 ### Configuration Parameters
 ```
-============================================================================================================================================================================
-| config file            | cli                        | Default  | Optional values                  | Description                                                           |
-============================================================================================================================================================================
-| fileDir                | -f,  --fileDir             |          |                                   | The file directory path.                                             |
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| fileName               | -n,  --fileName            |          |                                   | The name of the file to be checked by the tool.                      |
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| comparedHashMethod     | -m,  --comparedHashMethod  | md5      | See hashlib.algorithms_guaranteed | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| compareWithWsGit       | -g,  --compareWithWsGit    | False    | True / False                      | If True -compared with git version ,if false use comparedHashMethod. |
-============================================================================================================================================================================
+=====================================================================================================================================================================================================
+| config file         | cli                        | Environment Variables     | Default  | Optional values                   | Description                                                          |
+=====================================================================================================================================================================================================
+| fileDir             | -f,  --fileDir             | WSVC_FILE_DIR             |          |                                   | The file directory path.                                             |
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| fileName            | -n,  --fileName            | WSVC_FILE_NAME            |          |                                   | The name of the file to be checked by the tool.                      |
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| comparedHashMethod  | -m,  --comparedHashMethod  | WSVC_COMPARED_HASH_METHOD | md5      | See hashlib.algorithms_guaranteed | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| compareWithWsGit    | -g,  --compareWithWsGit    | WSVC_COMPARE_WITH_WS_GIT  | False    | True / False                      | If True -compared with git version ,if false use comparedHashMethod. |
+=====================================================================================================================================================================================================
 ```
  ### Execution
  From the command line:
- - `python ws-version-checker.py -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
+ - `python ws_version_checker.py -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
  
  Using a config file:
- - `python ws-copy-policy.py -c / --configFile <CONFIG_FILE>`
+ - `python ws_version_checker.py -c / --configFile <CONFIG_FILE>`
+ 
+ Environment Variables
+ - A parameter name as defined in the configuration file converted to upper case with underscore (`_`) separators and **WSVC**_ prefix added.
+ - For example the **fileName** parameter can be set using the `WSVC_FILE_NAME` environment variable.
+ - In case an environment variable exists , it will overrun any value which exists for the matching parmter in the command line  / configuration file.
+   
  
 ### Author
 WhiteSource Software ©
