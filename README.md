@@ -24,15 +24,15 @@ The script checks the artifact version by one of the following :
 - **Windows (PowerShell):**	10, 2012, 2016
 
 ### Prerequisites
-- Python 3.6 or above
-- One of the followings ( in favor of jarsigner ) : Java JDK 8 ,Java JDK 11
+- Python 3.6 or above.
+- Java JDK 8 ,Java JDK 11 ( in favor of jarsigner ).  
 
 ### Installation
 1. Download and unzip **ws-version-checker.zip**.
 2. From the command line, navigate to the ws-version-checker directory and install the package:  
    `pip install -r requirements.txt`. 
-3. Edit the **params.config** file and update the relevant parameters (see the configuration parameters below) or
-   use a cmd line for running.
+3. Edit the `/version_check/params.config` file and update the relevant parameters (see the configuration parameters below) or
+   use a cmd line for running the `/version_check/ws_version_checker.py` script.
     
 ### Configuration Parameters
 ```
@@ -55,9 +55,9 @@ The script checks the artifact version by one of the following :
  Using a config file:
  - `python ws_version_checker.py -c / --configFile <CONFIG_FILE>`
  
- Environment Variables
+ Environment Variables:
  - A parameter name as defined in the configuration file converted to upper case with underscore (`_`) separators and **WSVC**_ prefix added.
- - For example the **fileName** parameter can be set using the `WSVC_FILE_NAME` environment variable.
+ - For example the `fileName` parameter can be set using the `WSVC_FILE_NAME` environment variable.
  - In case an environment variable exists , it will overrun any value which exists for the matching parmter in the command line  / configuration file.
    
  
