@@ -43,14 +43,17 @@ The script checks the tool version by one of the following :
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | fileName            | -n,  --fileName            | WSVC_FILE_NAME            |          |                                   | The name of the file to be checked by the tool.                      |
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| comparedHashMethod  | -m,  --comparedHashMethod  | WSVC_COMPARED_HASH_METHOD | md5      | See hashlib.algorithms_guaranteed | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
+| compareWithWsGit    | -g,  --compareWithWsGit    | WSVC_COMPARE_WITH_WS_GIT  | True     | True / False                      | If True -compared with git version ,if false use comparedHashMethod. |
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| compareWithWsGit    | -g,  --compareWithWsGit    | WSVC_COMPARE_WITH_WS_GIT  | False    | True / False                      | If True -compared with git version ,if false use comparedHashMethod. |
+| comparedHashMethod  | -m,  --comparedHashMethod  | WSVC_COMPARED_HASH_METHOD | md5      | See hashlib.algorithms_guaranteed | One of hashlib.algorithms_guaranteed to perform the hash compare.    |
 =====================================================================================================================================================================================================
 ```
  ### Execution
  From the command line:
- - `python ws_version_checker.py -f $fileDir -n $fileName -m $comparedHashMethod -g $compareWithWsGit`
+ - When compareWithWsGit = True
+ `python ws_version_checker.py -f $fileDir -n $fileName -g $compareWithWsGit`
+ - When compareWithWsGit = False
+ `python ws_version_checker.py -f $fileDir -n $fileName -g $compareWithWsGit -m $comparedHashMethod`
  
  Using a config file:
  - `python ws_version_checker.py -c / --configFile <CONFIG_FILE>`

@@ -22,21 +22,20 @@ HASH_TYPE = hashlib.algorithms_guaranteed
 
 DEFAULT_CONFIG_FILE = './version_check/params.config'
 CONFIG_FILE_HEADER_NAME = 'DEFAULT'
-HEXDIGSET_LENGTH = 64
 
 # fallback / default values
 DEFAULT_COMPARED_HASH_METHOD = 'md5'
 DEFAULT_COMPARE_WITH_WS_GIT = True
 
-UNSIGNED = "unsigned"
+unsigned = "unsigned"
 JAR = ".jar"
 WSVC_PREFIX = 'WSVC_'
 WSVC_ENV_VARS = [WSVC_PREFIX + sub for sub in ('FILE_NAME', 'FILE_DIR', 'COMPARED_HASH_METHOD', 'COMPARE_WITH_WS_GIT')]
 
-UA_PROPERTIES_FILE_LOCATION = 'META-INF/maven/org.whitesource/wss-unified-agent-main/pom.properties'
-UA_GIT_URL = 'https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar'
-UA_MAIN_URL = 'https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar'
-UNIFIED_AGENT = 'Unified Agent'
+ua_properties_file_location = 'META-INF/maven/org.whitesource/wss-unified-agent-main/pom.properties'
+ua_git_url = 'https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar'
+ua_main_url = 'https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar'
+unified_agent = 'Unified Agent'
 
 
 # NamedTuple for
@@ -46,9 +45,9 @@ class ToolType(NamedTuple):
     tool_name: str
 
 
-TOOLS_TYPES = {UA_PROPERTIES_FILE_LOCATION: ToolType(git_url=UA_GIT_URL,
-                                                     main_url=UA_MAIN_URL,
-                                                     tool_name=UNIFIED_AGENT)
+TOOLS_TYPES = {ua_properties_file_location: ToolType(git_url=ua_git_url,
+                                                     main_url=ua_main_url,
+                                                     tool_name=unified_agent)
                }
 
 
@@ -65,8 +64,8 @@ def get_args(arguments) -> dict:
 
     parser.add_argument('-f', "--fileDir", help="The file directory path", required=not is_config_file, dest='file_dir')
     parser.add_argument('-n', "--fileName", help="The name of the file to be checked by the tool", required=not is_config_file, dest='file_name')
+    parser.add_argument('-g', "--compareWithWsGit", help="True -compared with git version ,False -comparedHashMethod", dest='compare_with_ws_git', default=DEFAULT_COMPARE_WITH_WS_GIT, type=str2bool)
     parser.add_argument('-m', "--comparedHashMethod", help="One of hashlib.algorithms_guaranteed", dest='compared_hash_method', default=DEFAULT_COMPARED_HASH_METHOD, choices=HASH_TYPE)
-    parser.add_argument('-g', "--compareWithWsGit", help="True-compared with git version ,false-comparedHashMethod", dest='compare_with_ws_git', default=DEFAULT_COMPARE_WITH_WS_GIT, type=str2bool)
 
     args = parser.parse_args()
     logging.info(f"Arguments received :{args}")
@@ -94,10 +93,11 @@ def get_config_file(config_file) -> dict:
     conf_file_dict = {
         'file_dir': conf_file[CONFIG_FILE_HEADER_NAME].get('fileDir'),
         'file_name': conf_file[CONFIG_FILE_HEADER_NAME].get('fileName'),
-        'compared_hash_method': conf_file[CONFIG_FILE_HEADER_NAME].get('comparedHashMethod', fallback=DEFAULT_COMPARED_HASH_METHOD),
-        'compare_with_ws_git': conf_file[CONFIG_FILE_HEADER_NAME].getboolean('compareWithWsGit', fallback=DEFAULT_COMPARE_WITH_WS_GIT)
+        'compare_with_ws_git': conf_file[CONFIG_FILE_HEADER_NAME].getboolean('compareWithWsGit', fallback=DEFAULT_COMPARE_WITH_WS_GIT),
+        'compared_hash_method': conf_file[CONFIG_FILE_HEADER_NAME].get('comparedHashMethod', fallback=DEFAULT_COMPARED_HASH_METHOD)
     }
-    check_if_config_hash_method_is_valid(conf_file_dict['compared_hash_method'])
+    if conf_file_dict['compare_with_ws_git'] is False:
+        check_if_config_hash_method_is_valid(conf_file_dict['compared_hash_method'])
 
     conf_file_dict.update(get_config_parameters_from_environment_variables())
 
@@ -163,7 +163,7 @@ def verify_tool_signature_with_whitesource(file_extension):
     if file_extension == JAR:
         shell_command = subprocess.Popen(f"jarsigner -verify {config['file_path']}", shell=True, stdout=subprocess.PIPE)
         subprocess_return = shell_command.stdout.read()
-        if UNSIGNED in str(subprocess_return):
+        if unsigned in str(subprocess_return):
             logging.error("The file to be checked is not a WhiteSource signed tool")
             sys.exit(1)
     else:
@@ -209,13 +209,13 @@ def check_versions_git_diff():
     git_file_version_final = fetch_remote_git_version()
 
     if version.parse(current_file_user_version) < version.parse(git_file_version_final):
-        is_download = True
+        to_download = True
         logging.info(f"A new {config['ws_tool_name']} version ({git_file_version_final}) has been found ")
     else:
-        is_download = False
+        to_download = False
         logging.info(f"You have the latest {config['ws_tool_name']} version ({git_file_version_final})")
 
-    return is_download
+    return to_download
 
 
 def fetch_local_tool_version():
@@ -227,10 +227,10 @@ def fetch_local_tool_version():
     archive = zipfile.ZipFile(config['file_path'], 'r')
     file_prop_path = archive.read(config['ws_tool_prop_file'])
     file_prop_path = str(file_prop_path, 'UTF-8')
-    current_file_user_version = file_prop_path.split('version=')[1].split('groupId')[0].split('\n')[0]
-    logging.info(config['file_path'] + " version is : " + current_file_user_version)
+    current_local_file_version = file_prop_path.split('version=')[1].split('groupId')[0].split('\n')[0]
+    logging.info(config['file_path'] + " version is : " + current_local_file_version)
 
-    return current_file_user_version
+    return current_local_file_version
 
 
 def fetch_remote_git_version():
@@ -304,7 +304,7 @@ def calc_hash_checksum(file_p, remote_url, hash_type):
         hash_calc.update(latest_tool_version)
 
     if hash_type in ['shake_128', 'shake_256']:
-        return hash_calc.hexdigest(HEXDIGSET_LENGTH)
+        return hash_calc.hexdigest(64)
     else:
         return hash_calc.hexdigest()
 
@@ -324,13 +324,6 @@ def check_if_config_hash_method_is_valid(hash_method):
 #######################################################################################################################
 
 def versions_compared_have_diff(compare_with_ws_git):
-    """Checks for versions differences
-
-    :param compare_with_ws_git: If True ,compare with ws git if False compare with hash diff
-    :type compare_with_ws_git: bool
-    :return: a boolean which indicates whether there is a difference (git / hash) versions of local vs remote file
-    :rtype: bool
-    """
 
     if compare_with_ws_git:
         is_version_diff = check_versions_git_diff()
