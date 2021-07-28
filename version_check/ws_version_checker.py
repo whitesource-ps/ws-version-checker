@@ -15,7 +15,7 @@ from packaging import version
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(asctime)s %(thread)d: %(message)s', stream=sys.stdout)
 
-latest_artifact_version = bytes()
+latest_tool_version = bytes()
 config = {}
 
 HASH_TYPE = hashlib.algorithms_guaranteed
@@ -39,18 +39,24 @@ UA_MAIN_URL = 'https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar'
 UNIFIED_AGENT = 'Unified Agent'
 
 
-class ArtifactType(NamedTuple):
+# NamedTuple for
+class ToolType(NamedTuple):
     git_url: str
     main_url: str
-    artifact_name: str
+    tool_name: str
 
 
-ARTIFACTS_TYPES = {UA_PROPERTIES_FILE_LOCATION: ArtifactType(git_url=UA_GIT_URL, main_url=UA_MAIN_URL, artifact_name=UNIFIED_AGENT)}
+TOOLS_TYPES = {UA_PROPERTIES_FILE_LOCATION: ToolType(git_url=UA_GIT_URL,
+                                                     main_url=UA_MAIN_URL,
+                                                     tool_name=UNIFIED_AGENT)
+               }
 
 
 ################################################################################
 
 def get_args(arguments) -> dict:
+    """Get configuration arguments"""
+
     logging.info("Start analyzing arguments.")
     parser = argparse.ArgumentParser(description="version-checker parser")
 
@@ -117,7 +123,7 @@ def get_config_parameters_from_environment_variables() -> dict:
             else:
                 wsvc_env_vars_dict[variable[len(WSVC_PREFIX):].lower()] = variable
 
-            if variable == 'WSVC_COMPARED_HASH_METHOD':  #
+            if variable == 'WSVC_COMPARED_HASH_METHOD':
                 check_if_config_hash_method_is_valid(wsvc_env_vars_dict['compared_hash_method'])
 
     return wsvc_env_vars_dict
@@ -137,28 +143,28 @@ def str2bool(v):
 
 ################################################################################
 
-def map_the_artifact_attributes_to_config():
+def map_the_tool_attributes_to_config():
     """Utilizing the config global dictionary to add variables to be used in the code."""
 
     file_extension = pathlib.Path(config['file_path']).suffix
-    verify_artifact_signature_with_whitesource(file_extension)
+    verify_tool_signature_with_whitesource(file_extension)
     prop_file = get_properties_file_location(file_extension)
 
-    artifact = ARTIFACTS_TYPES[prop_file]
-    config['ws_artifact_prop_file'] = prop_file
-    config['ws_artifact_name'] = artifact.artifact_name
-    config['ws_artifact_main_url'] = artifact.main_url
-    config['ws_artifact_git_url'] = artifact.git_url
+    tool = TOOLS_TYPES[prop_file]
+    config['ws_tool_prop_file'] = prop_file
+    config['ws_tool_name'] = tool.tool_name
+    config['ws_tool_main_url'] = tool.main_url
+    config['ws_tool_git_url'] = tool.git_url
 
 
-def verify_artifact_signature_with_whitesource(file_extension):
-    """This method validates that the checked file is a WhiteSource artifact. """
+def verify_tool_signature_with_whitesource(file_extension):
+    """This method validates that the checked file is a WhiteSource tool. """
 
     if file_extension == JAR:
         shell_command = subprocess.Popen(f"jarsigner -verify {config['file_path']}", shell=True, stdout=subprocess.PIPE)
         subprocess_return = shell_command.stdout.read()
         if UNSIGNED in str(subprocess_return):
-            logging.error("The file to be checked is not a WhiteSource signed artifact")
+            logging.error("The file to be checked is not a WhiteSource signed tool")
             sys.exit(1)
     else:
         logging.error("The file is not supported by WhiteSource Version-Checker - please check")
@@ -166,9 +172,9 @@ def verify_artifact_signature_with_whitesource(file_extension):
 
 
 def get_properties_file_location(file_extension):
-    """gets properties file full path in the checked artifact
+    """gets properties file full path in the checked tool
 
-    :param file_extension: The artifact extension type.
+    :param file_extension: The tool extension type.
     :type file_extension: str
     :return: The properties file path.
     :rtype: str
@@ -177,7 +183,7 @@ def get_properties_file_location(file_extension):
     if file_extension == JAR:
         archive = zipfile.ZipFile(config['file_path'], 'r')
         archive_file_list = archive.filelist
-        properties_files_types = ARTIFACTS_TYPES.keys()
+        properties_files_types = TOOLS_TYPES.keys()
         properties_file = None
 
         for element in properties_files_types:
@@ -195,33 +201,31 @@ def get_properties_file_location(file_extension):
 
 def check_versions_git_diff():
     """
-
     :return: a boolean which indicates whether there is a difference in the git value between local vs remote file.
     :rtype: bool
     """
 
-    current_file_user_version = fetch_local_artifact_version()
+    current_file_user_version = fetch_local_tool_version()
     git_file_version_final = fetch_remote_git_version()
 
     if version.parse(current_file_user_version) < version.parse(git_file_version_final):
         is_download = True
-        logging.info(f"A new {config['ws_artifact_name']} version ({git_file_version_final}) has been found ")
+        logging.info(f"A new {config['ws_tool_name']} version ({git_file_version_final}) has been found ")
     else:
         is_download = False
-        logging.info(f"You have the latest {config['ws_artifact_name']} version ({git_file_version_final})")
+        logging.info(f"You have the latest {config['ws_tool_name']} version ({git_file_version_final})")
 
     return is_download
 
 
-def fetch_local_artifact_version():
+def fetch_local_tool_version():
     """
-
-    :return:The local artifact's version .
+    :return:The local tool's version .
     :rtype:str
     """
 
     archive = zipfile.ZipFile(config['file_path'], 'r')
-    file_prop_path = archive.read(config['ws_artifact_prop_file'])
+    file_prop_path = archive.read(config['ws_tool_prop_file'])
     file_prop_path = str(file_prop_path, 'UTF-8')
     current_file_user_version = file_prop_path.split('version=')[1].split('groupId')[0].split('\n')[0]
     logging.info(config['file_path'] + " version is : " + current_file_user_version)
@@ -231,12 +235,11 @@ def fetch_local_artifact_version():
 
 def fetch_remote_git_version():
     """
-
-    :return: The artifact's latest version from the remote repository main branch .
+    :return: The tool's latest version from the remote repository main branch .
     :rtype:str
     """
 
-    file_response = requests.head(config['ws_artifact_git_url'])
+    file_response = requests.head(config['ws_tool_git_url'])
     headers = file_response.headers
     location = headers["location"]
     git_version = re.search('download/v(.*)/', location)
@@ -249,8 +252,7 @@ def fetch_remote_git_version():
 
 def check_version_hash_diff():
     """
-
-    :return: an indication whether there is a difference in the hash value between local vs remote file
+    :return: An indication whether there is a difference in the hash value between local vs remote file
     :rtype: bool
     """
 
@@ -259,26 +261,26 @@ def check_version_hash_diff():
     logging.info(f"{config['compared_hash_method']} checksum-->local : {local_file_hash}")
 
     # fetch the remote hash value
-    remote_file_hash = calc_hash_checksum(None, config['ws_artifact_main_url'], config['compared_hash_method'])
+    remote_file_hash = calc_hash_checksum(None, config['ws_tool_main_url'], config['compared_hash_method'])
     logging.info(f"{config['compared_hash_method']} checksum-->remote :  {remote_file_hash}")
 
     # compare between local hash version and remote hash version
     if local_file_hash == remote_file_hash:
         is_download = False
-        logging.info(f"You have the latest {config['ws_artifact_name']} version ({local_file_hash})")
+        logging.info(f"You have the latest {config['ws_tool_name']} version ({local_file_hash})")
     else:
         is_download = True
-        logging.info(f"A new {config['ws_artifact_name']} version has been found. ")
+        logging.info(f"A new {config['ws_tool_name']} version has been found. ")
 
     return is_download
 
 
 def calc_hash_checksum(file_p, remote_url, hash_type):
-    """Calculating the artifact hash value checksum
+    """Calculating the tool hash value checksum
 
     :param file_p: The checked file full path ( fileDir+fileName )
     :type file_p: str/None
-    :param remote_url: The main url to retrieve the artifact file
+    :param remote_url: The main url to retrieve the tool file
     :type remote_url: str/None
     :param hash_type: One of the methods from hashlib.algorithms_guaranteed
     :type hash_type: str
@@ -286,7 +288,7 @@ def calc_hash_checksum(file_p, remote_url, hash_type):
     :rtype: str
     """
 
-    global latest_artifact_version  # set as global to avoid downloading in case hash compare results in a new available version.
+    global latest_tool_version  # set as global to avoid downloading in case hash compare results in a new available version.
     hash_calc = eval('hashlib.' + hash_type + '()')
 
     if remote_url is None:
@@ -298,8 +300,8 @@ def calc_hash_checksum(file_p, remote_url, hash_type):
                     break
     else:
         response = requests.get(remote_url, allow_redirects=True, headers={'Cache-Control': 'no-cache'})
-        latest_artifact_version = response.content
-        hash_calc.update(latest_artifact_version)
+        latest_tool_version = response.content
+        hash_calc.update(latest_tool_version)
 
     if hash_type in ['shake_128', 'shake_256']:
         return hash_calc.hexdigest(HEXDIGSET_LENGTH)
@@ -339,29 +341,29 @@ def versions_compared_have_diff(compare_with_ws_git):
 
 
 def download_new_version(compare_with_ws_git):
-    """Download the new artifact version
+    """Download the new tool version
 
     :param compare_with_ws_git: if True ,download from git url ,if False download from main url
     :type compare_with_ws_git: bool
     """
 
     if compare_with_ws_git:
-        logging.info(f"Start downloading the WhiteSource {config['ws_artifact_name']} latest version.")
+        logging.info(f"Start downloading the WhiteSource {config['ws_tool_name']} latest version.")
 
-        r = requests.get(config['ws_artifact_git_url'], allow_redirects=True, headers={'Cache-Control': 'no-cache'})
+        r = requests.get(config['ws_tool_git_url'], allow_redirects=True, headers={'Cache-Control': 'no-cache'})
         open(config['file_path'], 'wb').write(r.content)
 
-        logging.info(f"WhiteSource {config['ws_artifact_name']} latest version download is completed.")
+        logging.info(f"WhiteSource {config['ws_tool_name']} latest version download is completed.")
 
     else:
-        open(config['file_path'], 'wb').write(latest_artifact_version)
+        open(config['file_path'], 'wb').write(latest_tool_version)
 
-        logging.info(f"WhiteSource {config['ws_artifact_name']} latest version was updated.")
+        logging.info(f"WhiteSource {config['ws_tool_name']} latest version was updated.")
 
 
 #######################################################################################################################
 
-def validate_checked_artifact_local_file_exist():
+def validate_checked_tool_local_file_exist():
     logging.info(f"Checking if the file exists in your environment.")
     config['file_path'] = os.path.join(config['file_dir'], config['file_name'])
 
@@ -375,9 +377,7 @@ def validate_checked_artifact_local_file_exist():
 #######################################################################################################################
 
 def read_setup():
-    """reads the configuration from cli / config file and updates in a global config
-
-    """
+    """reads the configuration from cli / config file and updates in a global config."""
 
     global config
     args = sys.argv[1:]
@@ -393,14 +393,14 @@ def read_setup():
 
 def main():
     read_setup()
-    validate_checked_artifact_local_file_exist()
-    map_the_artifact_attributes_to_config()
+    validate_checked_tool_local_file_exist()
+    map_the_tool_attributes_to_config()
     logging.info("Starting WhiteSource version check...")
 
     if versions_compared_have_diff(config['compare_with_ws_git']):
         download_new_version(config['compare_with_ws_git'])
 
-    logging.info(f"WhiteSource {config['ws_artifact_name']} version check completed.")
+    logging.info(f"WhiteSource {config['ws_tool_name']} version check completed.")
 
 
 if __name__ == '__main__':

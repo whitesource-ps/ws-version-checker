@@ -5,19 +5,19 @@
 [![Build and Publish](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/whitesource-ps/ws-version-checker/actions/workflows/ci.yml)
 [![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
-# WhiteSource Version-Checker
-The script enables checking the WhiteSource artifacts , validate whether there is a new version and update it accordingly.
-### Supported artifacts 
+# WhiteSource Version Checker
+The script enables checking the WhiteSource tools , validate whether there is a new version and update it accordingly.
+### Supported tools 
 - [WhiteSource Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/804814917/Unified+Agent+Overview).
 
 ### How to use the script
-- Run on your local machine where the artifact is stored.
-- Run as part of your CI process , prior of using one of the supported artifacts.
+- Run on your local machine where the tool is stored.
+- Run as part of your CI process , prior of using one of the supported tools.
 
 ### What does the script do?
-The script checks the artifact version by one of the following :
+The script checks the tool version by one of the following :
 1. Compare of the local version file hash value (based on [hashlib.algorithms_guaranteed](https://github.com/python/cpython/blob/main/Lib/hashlib.py)) with the latest version from WhiteSource.
-2. Compare of the local version file semantic versioning with the WhiteSource artifact GitHub repo latest release link - [for example - Unified Agent](https://github.com/whitesource/unified-agent-distribution/releases) .
+2. Compare of the local version file semantic versioning with the WhiteSource tool GitHub repo latest release link - [for example - Unified Agent](https://github.com/whitesource/unified-agent-distribution/releases) .
 
 ### Supported Operating Systems
 - **Linux (Bash):**	CentOS, Debian, Ubuntu, RedHat
