@@ -46,4 +46,13 @@ jobs:
           cloud: whitesource
           user: ${{ secrets.CONFLUENCE_USER }}
           token: ${{ secrets.CONFLUENCE_TOKEN }}
+      - name: confluence-markdown-sync - Public Community
+        if: github.ref == 'refs/heads/master'
+        uses: cupcakearmy/confluence-markdown-sync@v1
+        with:
+          from: README.md
+          to: 2352644135
+          cloud: whitesource
+          user: ${{ secrets.CONFLUENCE_USER }}
+          token: ${{ secrets.CONFLUENCE_TOKEN }}
           
