@@ -20,7 +20,7 @@ config = {}
 
 HASH_TYPE = hashlib.algorithms_guaranteed
 
-DEFAULT_CONFIG_FILE = './version_check/params.config'
+DEFAULT_CONFIG_FILE = 'params.config'
 CONFIG_FILE_HEADER_NAME = 'DEFAULT'
 
 # fallback / default values
@@ -375,7 +375,7 @@ def read_setup():
     args = sys.argv[1:]
     if len(args) > 0:
         config = get_args(args)
-    elif os.path.exists(DEFAULT_CONFIG_FILE):  # used when running the script an IDE same path of CONFIG_FILE (params.config)
+    elif os.path.isfile(DEFAULT_CONFIG_FILE):  # used when running the script an IDE same path of CONFIG_FILE (params.config)
         config = get_config_file(DEFAULT_CONFIG_FILE)
     else:
         config = get_config_parameters_from_environment_variables()
