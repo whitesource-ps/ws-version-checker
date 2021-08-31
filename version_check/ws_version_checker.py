@@ -20,7 +20,7 @@ config = {}
 
 HASH_TYPE = hashlib.algorithms_guaranteed
 
-DEFAULT_CONFIG_FILE = './version_check/params.config'
+DEFAULT_CONFIG_FILE = 'params.config'
 CONFIG_FILE_HEADER_NAME = 'DEFAULT'
 
 # fallback / default values
@@ -118,10 +118,10 @@ def get_config_parameters_from_environment_variables() -> dict:
     for variable in WSVC_ENV_VARS:
         if variable in os_env_variables:
             logging.info(f"found {variable} environment variable - will use its value")
+            wsvc_env_vars_dict[variable[len(WSVC_PREFIX):].lower()] = os_env_variables[variable]
+
             if variable == 'WSVC_COMPARE_WITH_WS_GIT':
-                wsvc_env_vars_dict[variable[len(WSVC_PREFIX):].lower()] = str2bool(os_env_variables[variable])  # to assign boolean instead of string
-            else:
-                wsvc_env_vars_dict[variable[len(WSVC_PREFIX):].lower()] = variable
+                wsvc_env_vars_dict.update({'compare_with_ws_git': str2bool(wsvc_env_vars_dict['compare_with_ws_git'])})  # to assign boolean instead of string
 
             if variable == 'WSVC_COMPARED_HASH_METHOD':
                 check_if_config_hash_method_is_valid(wsvc_env_vars_dict['compared_hash_method'])
@@ -324,7 +324,6 @@ def check_if_config_hash_method_is_valid(hash_method):
 #######################################################################################################################
 
 def versions_compared_have_diff(compare_with_ws_git):
-
     if compare_with_ws_git:
         is_version_diff = check_versions_git_diff()
         return is_version_diff
@@ -376,7 +375,7 @@ def read_setup():
     args = sys.argv[1:]
     if len(args) > 0:
         config = get_args(args)
-    elif os.path.exists(DEFAULT_CONFIG_FILE):  # used when running the script an IDE same path of CONFIG_FILE (params.config)
+    elif os.path.isfile(DEFAULT_CONFIG_FILE):  # used when running the script an IDE same path of CONFIG_FILE (params.config)
         config = get_config_file(DEFAULT_CONFIG_FILE)
     else:
         config = get_config_parameters_from_environment_variables()

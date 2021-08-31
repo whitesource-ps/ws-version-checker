@@ -39,8 +39,8 @@ jobs:
           allowUpdates: true
           artifacts: "*.zip"
       - name: confluence-markdown-sync
-        uses: cupcakearmy/confluence-markdown-sync@v1     
-        with: 
+        uses: cupcakearmy/confluence-markdown-sync@v1
+        with:
           from: README.md
           to: 2264268805
           cloud: whitesource
@@ -55,4 +55,3 @@ jobs:
           cloud: whitesource
           user: ${{ secrets.CONFLUENCE_USER }}
           token: ${{ secrets.CONFLUENCE_TOKEN }}
-          
