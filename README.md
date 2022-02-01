@@ -6,18 +6,18 @@
 [![Python 3.6](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Blue_Python_3.6%2B_Shield_Badge.svg/86px-Blue_Python_3.6%2B_Shield_Badge.svg.png)](https://www.python.org/downloads/release/python-360/)
 
 # WhiteSource Version Checker
-The script enables checking the WhiteSource tools , validate whether there is a new version and update it accordingly.
+The script checks the WhiteSource tools , validates whether there is a new version and updates it accordingly.
 ### Supported tools 
 - [WhiteSource Unified Agent](https://whitesource.atlassian.net/wiki/spaces/WD/pages/804814917/Unified+Agent+Overview).
 
 ### How to use the script
-- Run on your local machine where the tool is stored.
-- Run as part of your CI process , prior of using one of the supported tools.
+- Run it on your local machine where the tool is stored.
+- Run it as part of your CI process , prior to using one of the supported tools.
 
 ### What does the script do?
-The script checks the tool version by one of the following :
-1. Compare of the local version file hash value (based on [hashlib.algorithms_guaranteed](https://github.com/python/cpython/blob/main/Lib/hashlib.py)) with the latest version from WhiteSource.
-2. Compare of the local version file semantic versioning with the WhiteSource tool GitHub repo latest release link - [for example - Unified Agent](https://github.com/whitesource/unified-agent-distribution/releases) .
+The script checks the tool version in one of the following ways:
+1. Compares the local version file hash value (based on [hashlib.algorithms_guaranteed](https://github.com/python/cpython/blob/main/Lib/hashlib.py)) with the latest version from WhiteSource.
+2. Compares the local version file semantic versioning with the WhiteSource tool GitHub repo latest release link - [for example - Unified Agent](https://github.com/whitesource/unified-agent-distribution/releases) .
 
 ### Supported Operating Systems
 - **Linux (Bash):**	CentOS, Debian, Ubuntu, RedHat
@@ -61,7 +61,7 @@ The script checks the tool version by one of the following :
  Environment Variables:
  - A parameter name as defined in the configuration file converted to upper case with underscore (`_`) separators and **WSVC**_ prefix added.
  - For example the `fileName` parameter can be set using the `WSVC_FILE_NAME` environment variable.
- - In case an environment variable exists , it will overrun any value which exists for the matching parmter in the command line  / configuration file.
+ - If an environment variable exists , it will overwrite any value for the matching parmter in the command line  / configuration file.
    
  
 ### Author
