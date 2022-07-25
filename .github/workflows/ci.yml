@@ -1,6 +1,13 @@
 name: WS Version Checker Build and Publish
-on: [push]
-
+on:
+  push:
+    branches:
+      - '**'
+      - '!ws-iac-scan-results/**'
+      - '!whitesource-remediate/master-all**'
+      - '!whitesource/migrate-configuration**'
+    tags:
+      - '*'
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
